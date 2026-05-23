@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from app.schemas.symptom_schema import SymptomRequest, SymptomResponse
 
 router = APIRouter()
 
@@ -8,16 +9,16 @@ def test_route():
         "message": "Symptoms route working"
     }
 
-@router.post("/analyze")
-def analyze_symptoms(data: dict):
-    return {
-        "received_symptoms": data,
-        "status": "Analysis completed"
-    }
+@router.post("/analyze", response_model=SymptomResponse)
+def analyze_symptoms(data: SymptomRequest):
 
-@router.get("/user")
-def get_user(name: str, age: int):
+    urgency = "Low"
+
+    if "chest pain" in data.symptoms.lower():
+        urgency = "High"
+
     return {
-        "name": name,
-        "age": age
+        "symptoms": data.symptoms,
+        "urgency": urgency,
+        "recommendation": "Consult a doctor if symptoms persist"
     }
