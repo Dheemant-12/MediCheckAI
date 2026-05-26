@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
+
 from sqlalchemy.orm import Session
 from jose import jwt
 
@@ -22,6 +23,16 @@ def signup(
     user: UserSignup,
     db: Session = Depends(get_db)
 ):
+
+    existing_user = db.query(User).filter(
+        User.email == user.email
+    ).first()
+
+    if existing_user:
+
+        return {
+            "error": "Email already exists"
+        }
 
     hashed_pw = hash_password(user.password)
 
@@ -54,7 +65,9 @@ def login(
     if not existing_user:
 
         return {
-            "error": "Invalid email"
+            "access_token": "",
+            "token_type": "bearer",
+            "message": "Invalid email"
         }
 
     valid_password = verify_password(
@@ -65,7 +78,9 @@ def login(
     if not valid_password:
 
         return {
-            "error": "Invalid password"
+            "access_token": "",
+            "token_type": "bearer",
+            "message": "Invalid password"
         }
 
     access_token = create_access_token(
