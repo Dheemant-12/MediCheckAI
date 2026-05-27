@@ -1,14 +1,39 @@
+import { useState } from "react"
+import axios from "axios"
+
 function Dashboard() {
 
-  const token = localStorage.getItem(
-    "token"
-  )
+  const [symptoms, setSymptoms] =
+    useState("")
 
-  const handleLogout = () => {
+  const [analysis, setAnalysis] =
+    useState("")
 
-    localStorage.removeItem("token")
+  const handleAnalyze = async () => {
 
-    window.location.href = "/"
+    try {
+
+      console.log("Sending request...")
+
+      const response = await axios.post(
+        "http://127.0.0.1:8000/analyze",
+        {
+          symptoms: symptoms
+        }
+      )
+
+      console.log(response.data)
+
+      setAnalysis(
+        response.data.analysis
+      )
+
+    } catch (error) {
+
+      console.log(error)
+
+      alert("AI analysis failed")
+    }
   }
 
   return (
@@ -17,28 +42,34 @@ function Dashboard() {
 
       <h1>MediCheck AI Dashboard</h1>
 
-      <p>
-        Authentication successful
-      </p>
-
-      <br />
-
-      <h3>Stored JWT Token:</h3>
+      <h3>Enter Symptoms</h3>
 
       <textarea
-        rows="10"
-        cols="80"
-        value={token || "No token found"}
-        readOnly
+        rows="5"
+        cols="60"
+        placeholder="Example: fever, cough, headache"
+        value={symptoms}
+        onChange={(e) =>
+          setSymptoms(e.target.value)
+        }
       />
 
       <br /><br />
 
-      <button
-        onClick={handleLogout}
-      >
-        Logout
+      <button onClick={handleAnalyze}>
+        Analyze Symptoms
       </button>
+
+      <br /><br />
+
+      <h2>AI Analysis</h2>
+
+      <textarea
+        rows="15"
+        cols="80"
+        value={analysis}
+        readOnly
+      />
 
     </div>
   )

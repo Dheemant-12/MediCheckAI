@@ -1,44 +1,20 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter
 
-from app.schemas.symptom_schema import (
-    SymptomRequest,
-    SymptomResponse
+from app.services.ai_service import (
+    analyze_symptoms
 )
-
-from app.models.symptom_model import SymptomLog
-
-from app.database.dependencies import get_db
 
 router = APIRouter()
 
-@router.post("/analyze", response_model=SymptomResponse)
-def analyze_symptoms(
-    data: SymptomRequest,
-    db: Session = Depends(get_db)
-):
+@router.post("/analyze")
+def analyze(data: dict):
 
-    urgency = "Low"
+    symptoms = data.get("symptoms")
 
-    if "chest pain" in data.symptoms.lower():
-        urgency = "High"
-
-    recommendation = "Consult a doctor if symptoms persist"
-
-    symptom_entry = SymptomLog(
-        symptoms=data.symptoms,
-        urgency=urgency,
-        recommendation=recommendation
+    ai_response = analyze_symptoms(
+        symptoms
     )
 
-    db.add(symptom_entry)
-
-    db.commit()
-
-    db.refresh(symptom_entry)
-
     return {
-        "symptoms": data.symptoms,
-        "urgency": urgency,
-        "recommendation": recommendation
+        "analysis": ai_response
     }
