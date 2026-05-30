@@ -8,6 +8,7 @@ from app.database.connection import engine, Base
 
 from app.models.user_model import User
 from app.models.symptom_model import SymptomLog
+from app.models.chat_model import ChatHistory
 
 Base.metadata.create_all(bind=engine)
 
