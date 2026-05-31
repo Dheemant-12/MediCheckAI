@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.symptoms import router as symptoms_router
 from app.routes.users import router as users_router
+from app.routes.history import router as history_router
 
 from app.database.connection import engine, Base
 
@@ -30,5 +31,5 @@ def home():
     }
 
 app.include_router(symptoms_router)
-
 app.include_router(users_router)
+app.include_router(history_router)

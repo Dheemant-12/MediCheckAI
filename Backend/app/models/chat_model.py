@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, Text, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, Text
 
 from app.database.connection import Base
 
@@ -13,11 +12,6 @@ class ChatHistory(Base):
         index=True
     )
 
-    user_id = Column(
-        Integer,
-        ForeignKey("users.id")
-    )
-
     user_message = Column(
         Text
     )
@@ -25,5 +19,3 @@ class ChatHistory(Base):
     ai_response = Column(
         Text
     )
-
-    user = relationship("User")
