@@ -1,6 +1,12 @@
-from sqlalchemy import Column, Integer, Text
+from sqlalchemy import (
+    Column,
+    Integer,
+    Text,
+    ForeignKey
+)
 
 from app.database.connection import Base
+
 
 class ChatHistory(Base):
 
@@ -10,6 +16,11 @@ class ChatHistory(Base):
         Integer,
         primary_key=True,
         index=True
+    )
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id")
     )
 
     user_message = Column(

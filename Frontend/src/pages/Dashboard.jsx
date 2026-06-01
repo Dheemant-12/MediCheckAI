@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import axios from "axios"
 
 function Dashboard() {
@@ -6,6 +6,55 @@ function Dashboard() {
   const [symptoms, setSymptoms] = useState("")
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
+
+  const token = localStorage.getItem("token")
+
+  console.log("TOKEN =", token)
+
+  useEffect(() => {
+
+    loadHistory()
+
+  }, [])
+
+  const loadHistory = async () => {
+
+    try {
+
+      const response = await axios.get(
+        "http://127.0.0.1:8000/history",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      const historyMessages = []
+
+      response.data.forEach((chat) => {
+
+        historyMessages.push({
+          role: "user",
+          content: chat.user_message
+        })
+
+        historyMessages.push({
+          role: "ai",
+          content: chat.ai_response
+        })
+
+      })
+
+      setMessages(historyMessages)
+
+    } catch (error) {
+
+      console.error(error)
+
+    }
+
+  }
 
   const handleAnalyze = async () => {
 
@@ -26,6 +75,11 @@ function Dashboard() {
         "http://127.0.0.1:8000/analyze",
         {
           symptoms
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
       )
 
@@ -52,7 +106,9 @@ function Dashboard() {
     } finally {
 
       setLoading(false)
+
     }
+
   }
 
   return (
@@ -73,9 +129,7 @@ function Dashboard() {
         }}
       >
 
-        <h1>
-          🩺 MediCheck AI
-        </h1>
+        <h1>🩺 MediCheck AI</h1>
 
         <p>
           Describe your symptoms and receive AI-powered guidance.
@@ -108,18 +162,8 @@ function Dashboard() {
             <div>
 
               <h3>
-                Welcome to MediCheck AI
+                No previous conversations
               </h3>
-
-              <p>
-                Example:
-              </p>
-
-              <ul>
-                <li>Fever and headache</li>
-                <li>Sore throat and cough</li>
-                <li>Chest pain when breathing</li>
-              </ul>
 
             </div>
 
