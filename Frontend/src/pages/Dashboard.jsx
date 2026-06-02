@@ -9,8 +9,6 @@ function Dashboard() {
 
   const token = localStorage.getItem("token")
 
-  console.log("TOKEN =", token)
-
   useEffect(() => {
 
     loadHistory()
@@ -56,6 +54,37 @@ function Dashboard() {
 
   }
 
+  const clearHistory = async () => {
+
+    try {
+
+      await axios.delete(
+        "http://127.0.0.1:8000/history",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      setMessages([])
+
+      alert(
+        "History cleared successfully"
+      )
+
+    } catch (error) {
+
+      console.error(error)
+
+      alert(
+        "Failed to clear history"
+      )
+
+    }
+
+  }
+
   const handleAnalyze = async () => {
 
     if (!symptoms.trim()) return
@@ -65,7 +94,10 @@ function Dashboard() {
       content: symptoms
     }
 
-    setMessages(prev => [...prev, userMessage])
+    setMessages(prev => [
+      ...prev,
+      userMessage
+    ])
 
     setLoading(true)
 
@@ -88,7 +120,10 @@ function Dashboard() {
         content: response.data.analysis
       }
 
-      setMessages(prev => [...prev, aiMessage])
+      setMessages(prev => [
+        ...prev,
+        aiMessage
+      ])
 
       setSymptoms("")
 
@@ -98,10 +133,14 @@ function Dashboard() {
 
       const aiError = {
         role: "ai",
-        content: "Sorry, something went wrong while analyzing symptoms."
+        content:
+          "Sorry, something went wrong while analyzing symptoms."
       }
 
-      setMessages(prev => [...prev, aiError])
+      setMessages(prev => [
+        ...prev,
+        aiError
+      ])
 
     } finally {
 
@@ -131,6 +170,25 @@ function Dashboard() {
 
         <h1>🩺 MediCheck AI</h1>
 
+        <button
+          onClick={() => {
+
+            localStorage.removeItem(
+              "token"
+            )
+
+            window.location.href = "/"
+
+          }}
+          style={{
+            padding: "10px 15px",
+            cursor: "pointer",
+            marginBottom: "15px"
+          }}
+        >
+          Logout
+        </button>
+
         <p>
           Describe your symptoms and receive AI-powered guidance.
         </p>
@@ -144,6 +202,18 @@ function Dashboard() {
           }}
         >
           New Chat
+        </button>
+
+        <button
+          onClick={clearHistory}
+          style={{
+            padding: "10px 15px",
+            marginLeft: "10px",
+            marginBottom: "15px",
+            cursor: "pointer"
+          }}
+        >
+          Clear History
         </button>
 
         <div

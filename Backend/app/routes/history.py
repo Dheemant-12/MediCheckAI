@@ -25,8 +25,6 @@ def get_history(
         current_user.id
     ).all()
 
-    db.close()
-
     result = []
 
     for chat in chats:
@@ -38,4 +36,32 @@ def get_history(
                 chat.ai_response
         })
 
+    db.close()
+
     return result
+
+
+@router.delete("/history")
+def clear_history(
+    current_user = Depends(
+        get_current_user
+    )
+):
+
+    db = SessionLocal()
+
+    db.query(
+        ChatHistory
+    ).filter(
+        ChatHistory.user_id ==
+        current_user.id
+    ).delete()
+
+    db.commit()
+
+    db.close()
+
+    return {
+        "message":
+        "History cleared successfully"
+    }

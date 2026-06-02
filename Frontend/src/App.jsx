@@ -1,11 +1,22 @@
 import {
   Routes,
-  Route
+  Route,
+  Navigate
 } from "react-router-dom"
 
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import Dashboard from "./pages/Dashboard"
+
+function ProtectedRoute({ children }) {
+
+  const token =
+    localStorage.getItem("token")
+
+  return token
+    ? children
+    : <Navigate to="/" />
+}
 
 function App() {
 
@@ -25,7 +36,11 @@ function App() {
 
       <Route
         path="/dashboard"
-        element={<Dashboard />}
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
       />
 
     </Routes>
