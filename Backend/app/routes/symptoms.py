@@ -22,7 +22,14 @@ def analyze(
     )
 ):
 
-    symptoms = data.get("symptoms")
+    symptoms = data.get(
+        "symptoms"
+    )
+
+    session_id = data.get(
+        "session_id"
+    )
+    print("SESSION ID RECEIVED:",session_id)
 
     response = analyze_symptoms(
         symptoms
@@ -32,6 +39,7 @@ def analyze(
 
     chat = ChatHistory(
         user_id=current_user.id,
+        session_id=session_id,
         user_message=symptoms,
         ai_response=response
     )
@@ -41,6 +49,11 @@ def analyze(
     db.commit()
 
     db.refresh(chat)
+
+    print(
+        "SAVED CHAT SESSION ID:",
+        chat.session_id
+    )
 
     db.close()
 

@@ -1,16 +1,16 @@
 from sqlalchemy import (
     Column,
     Integer,
-    Text,
+    String,
     ForeignKey
 )
 
 from app.database.connection import Base
 
 
-class ChatHistory(Base):
+class ChatSession(Base):
 
-    __tablename__ = "chat_history"
+    __tablename__ = "chat_sessions"
 
     id = Column(
         Integer,
@@ -23,15 +23,6 @@ class ChatHistory(Base):
         ForeignKey("users.id")
     )
 
-    session_id = Column(
-        Integer,
-        ForeignKey("chat_sessions.id")
-    )
-
-    user_message = Column(
-        Text
-    )
-
-    ai_response = Column(
-        Text
+    title = Column(
+        String
     )

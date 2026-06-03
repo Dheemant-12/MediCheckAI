@@ -7,14 +7,17 @@ function Dashboard() {
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
 
+  const [sessions, setSessions] = useState([])
+
+  const [selectedSession,
+    setSelectedSession] = useState(null)
   const token = localStorage.getItem("token")
 
   useEffect(() => {
 
-    loadHistory()
+    loadSessions()
 
   }, [])
-
   const loadHistory = async () => {
 
     try {
@@ -45,6 +48,82 @@ function Dashboard() {
       })
 
       setMessages(historyMessages)
+
+    } catch (error) {
+
+      console.error(error)
+
+    }
+
+  }
+  const loadSessions = async () => {
+
+    try {
+
+      const response = await axios.get(
+        "http://127.0.0.1:8000/sessions",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
+        }
+      )
+
+      setSessions(
+        response.data
+      )
+
+    } catch (error) {
+
+      console.error(error)
+
+    }
+
+  }
+  const loadSessionHistory =
+  async (sessionId) => {
+
+    try {
+
+      const response =
+        await axios.get(
+          `http://127.0.0.1:8000/session/${sessionId}/history`,
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`
+            }
+          }
+        )
+
+      const historyMessages = []
+
+      response.data.forEach(
+        (chat) => {
+
+          historyMessages.push({
+            role: "user",
+            content:
+              chat.user_message
+          })
+
+          historyMessages.push({
+            role: "ai",
+            content:
+              chat.ai_response
+          })
+
+        }
+      )
+
+      setSelectedSession(
+        sessionId
+      )
+
+      setMessages(
+        historyMessages
+      )
 
     } catch (error) {
 
@@ -164,9 +243,60 @@ function Dashboard() {
 
       <div
         style={{
-          width: "900px"
+          width: "1200px",
+          display: "flex",
+          gap: "20px"
         }}
       >
+      <div
+        style={{
+          width: "250px",
+          background: "white",
+          padding: "15px",
+          borderRadius: "12px",
+          border: "1px solid #ddd"
+        }}
+      >
+
+        <h3>
+          Conversations
+        </h3>
+
+        {sessions.map((session) => (
+
+          <div
+            key={session.id}
+            onClick={() =>
+              loadSessionHistory(
+                session.id
+              )
+            }
+            style={{
+              padding: "10px",
+              marginBottom: "10px",
+              cursor: "pointer",
+              border:
+                selectedSession === session.id
+                  ? "2px solid #007bff"
+                  : "1px solid #ddd",
+              borderRadius: "8px"
+            }}
+          >
+
+            {session.title}
+
+          </div>
+
+        ))}
+
+      </div>
+
+      <div
+        style={{
+          flex: 1
+        }}
+      >
+      
 
         <h1>🩺 MediCheck AI</h1>
 
@@ -329,6 +459,8 @@ function Dashboard() {
       </div>
 
     </div>
+  
+  </div>
 
   )
 }
