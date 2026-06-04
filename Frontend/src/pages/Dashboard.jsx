@@ -247,6 +247,33 @@ function Dashboard() {
         aiMessage
       ])
 
+      if (
+        messages.length === 0
+      ) {
+
+        const title =
+          symptoms
+            .split(" ")
+            .slice(0, 4)
+            .join(" ")
+
+        await axios.put(
+          `http://127.0.0.1:8000/session/${selectedSession}`,
+          {
+            title
+          },
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`
+            }
+          }
+        )
+
+        await loadSessions()
+
+      }
+
       setSymptoms("")
 
     } catch (error) {
