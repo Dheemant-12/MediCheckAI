@@ -132,7 +132,40 @@ function Dashboard() {
     }
 
   }
+  const createSession = async () => {
 
+  try {
+
+    const response =
+      await axios.post(
+        "http://127.0.0.1:8000/session",
+        {
+          title:
+            "New Conversation"
+        },
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
+        }
+      )
+
+    await loadSessions()
+
+    setSelectedSession(
+      response.data.session_id
+    )
+
+    setMessages([])
+
+  } catch (error) {
+
+    console.error(error)
+
+  }
+
+}
   const clearHistory = async () => {
 
     try {
@@ -165,7 +198,15 @@ function Dashboard() {
   }
 
   const handleAnalyze = async () => {
+    if (!selectedSession) {
 
+      alert(
+        "Please select or create a conversation first."
+      )
+
+      return
+
+    }
     if (!symptoms.trim()) return
 
     const userMessage = {
@@ -185,6 +226,8 @@ function Dashboard() {
       const response = await axios.post(
         "http://127.0.0.1:8000/analyze",
         {
+          session_id:
+            selectedSession,
           symptoms
         },
         {
@@ -324,7 +367,7 @@ function Dashboard() {
         </p>
 
         <button
-          onClick={() => setMessages([])}
+          onClick={createSession}
           style={{
             padding: "10px 15px",
             marginBottom: "15px",
