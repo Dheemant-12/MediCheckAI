@@ -75,3 +75,96 @@ def get_sessions(
     db.close()
 
     return result
+@router.put("/session/{session_id}")
+def update_session_title(
+    session_id: int,
+    data: dict,
+    current_user = Depends(
+        get_current_user
+    )
+):
+
+    db = SessionLocal()
+
+    session = db.query(
+        ChatSession
+    ).filter(
+        ChatSession.id == session_id,
+        ChatSession.user_id ==
+        current_user.id
+    ).first()
+
+    if not session:
+
+        db.close()
+
+        return {
+            "message":
+            "Session not found"
+        }
+
+    session.title = data.get(
+        "title",
+        session.title
+    )
+
+    db.commit()
+
+    db.refresh(session)
+
+    db.close()
+
+    return {
+        "message":
+        "Title updated",
+        "title":
+        session.title
+    }
+@router.delete("/session/{session_id}")
+def delete_session(
+    session_id: int,
+    current_user = Depends(
+        get_current_user
+    )
+):
+
+    db = SessionLocal()
+
+    session = db.query(
+        ChatSession
+    ).filter(
+        ChatSession.id == session_id,
+        ChatSession.user_id ==
+        current_user.id
+    ).first()
+
+    if not session:
+
+        db.close()
+
+        return {
+            "message":
+            "Session not found"
+        }
+
+    from app.models.chat_model import (
+        ChatHistory
+    )
+
+    db.query(
+        ChatHistory
+    ).filter(
+        ChatHistory.session_id ==
+        session_id
+    ).delete()
+
+    db.delete(session)
+
+    db.commit()
+
+    db.close()
+
+    return {
+        "message":
+        "Session deleted"
+    }

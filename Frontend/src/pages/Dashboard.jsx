@@ -166,6 +166,43 @@ function Dashboard() {
   }
 
 }
+  const deleteSession =
+  async (sessionId) => {
+
+    try {
+
+      await axios.delete(
+        `http://127.0.0.1:8000/session/${sessionId}`,
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
+        }
+      )
+
+      if (
+        selectedSession ===
+        sessionId
+      ) {
+
+        setSelectedSession(
+          null
+        )
+
+        setMessages([])
+
+      }
+
+      await loadSessions()
+
+    } catch (error) {
+
+      console.error(error)
+
+    }
+
+  }
   const clearHistory = async () => {
 
     try {
@@ -336,31 +373,54 @@ function Dashboard() {
 
           <div
             key={session.id}
-            onClick={() =>
-              loadSessionHistory(
-                session.id
-              )
-            }
             style={{
-              padding: "10px",
-              marginBottom: "10px",
-              cursor: "pointer",
-              border:
-                selectedSession === session.id
-                  ? "2px solid #007bff"
-                  : "1px solid #ddd",
-              borderRadius: "8px"
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginBottom: "10px"
             }}
           >
 
-            {session.title}
+            <div
+              onClick={() =>
+                loadSessionHistory(
+                  session.id
+                )
+              }
+              style={{
+                flex: 1,
+                padding: "10px",
+                cursor: "pointer",
+                border:
+                  selectedSession ===
+                  session.id
+                    ? "2px solid #007bff"
+                    : "1px solid #ddd",
+                borderRadius: "8px"
+              }}
+            >
+
+              {session.title}
+
+            </div>
+
+            <button
+              onClick={() =>
+                deleteSession(
+                  session.id
+                )
+              }
+              style={{
+                cursor: "pointer"
+              }}
+            >
+              🗑
+            </button>
 
           </div>
 
         ))}
-
-      </div>
-
+      </div>     
       <div
         style={{
           flex: 1
