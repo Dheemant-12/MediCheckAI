@@ -11,6 +11,8 @@ function Dashboard() {
 
   const [selectedSession,
     setSelectedSession] = useState(null)
+  const [editingSession,
+    setEditingSession] = useState(null)  
   const token = localStorage.getItem("token")
 
   useEffect(() => {
@@ -193,6 +195,39 @@ function Dashboard() {
         setMessages([])
 
       }
+
+      await loadSessions()
+
+    } catch (error) {
+
+      console.error(error)
+
+    }
+
+  }
+  const renameSession =
+  async (sessionId) => {
+
+    const newTitle = prompt(
+      "Enter new title"
+    )
+
+    if (!newTitle) return
+
+    try {
+
+      await axios.put(
+        `http://127.0.0.1:8000/session/${sessionId}`,
+        {
+          title: newTitle
+        },
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
+        }
+      )
 
       await loadSessions()
 
@@ -416,18 +451,28 @@ function Dashboard() {
             >
               🗑
             </button>
+            <button
+              onClick={() =>
+                renameSession(
+                  session.id
+                )
+              }
+              style={{
+                cursor: "pointer"
+              }}
+            >
+              ✏️
+            </button>  
 
-          </div>
+            </div>
 
-        ))}
+          ))}
       </div>     
       <div
         style={{
           flex: 1
         }}
       >
-      
-
         <h1>🩺 MediCheck AI</h1>
 
         <button
