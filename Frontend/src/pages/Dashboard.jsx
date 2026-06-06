@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect,useRef } from "react"
 import axios from "axios"
 
 function Dashboard() {
@@ -11,6 +11,7 @@ function Dashboard() {
 
   const [selectedSession,
     setSelectedSession] = useState(null)
+  const messagesEndRef =useRef(null)  
   const [editingSession,
     setEditingSession] = useState(null)  
   const token = localStorage.getItem("token")
@@ -20,6 +21,15 @@ function Dashboard() {
     loadSessions()
 
   }, [])
+  useEffect(() => {
+
+    messagesEndRef.current
+      ?.scrollIntoView({
+        behavior: "smooth"
+      })
+
+  }, [messages])
+
   const loadHistory = async () => {
 
     try {
@@ -170,6 +180,16 @@ function Dashboard() {
 }
   const deleteSession =
   async (sessionId) => {
+    const confirmDelete =
+      window.confirm(
+        "Delete this conversation?"
+      )
+
+    if (!confirmDelete) {
+
+      return
+
+    }
 
     try {
 
@@ -431,7 +451,12 @@ function Dashboard() {
                   session.id
                     ? "2px solid #007bff"
                     : "1px solid #ddd",
-                borderRadius: "8px"
+                borderRadius: "8px",
+                 background:
+                  selectedSession ===
+                  session.id
+                    ? "#e7f1ff"
+                    : "white"
               }}
             >
 
@@ -592,6 +617,9 @@ function Dashboard() {
             </div>
 
           )}
+          <div
+            ref={messagesEndRef}
+          />
 
         </div>
 
@@ -626,7 +654,9 @@ function Dashboard() {
               cursor: "pointer"
             }}
           >
-            Send
+            {loading
+              ? "Analyzing..."
+              : "Send"}
           </button>
 
         </div>
