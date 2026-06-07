@@ -258,36 +258,98 @@ function Dashboard() {
     }
 
   }
-  const clearHistory = async () => {
+  const exportPdf =
+  async () => {
+
+    if (!selectedSession) {
+
+      alert(
+        "Select a conversation first"
+      )
+
+      return
+
+    }
 
     try {
 
-      await axios.delete(
-        "http://127.0.0.1:8000/history",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
+      const response =
+        await axios.get(
+          `http://127.0.0.1:8000/session/${selectedSession}/pdf`,
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`
+            },
+            responseType:
+              "blob"
           }
-        }
+        )
+
+      const url =
+        window.URL.createObjectURL(
+          new Blob([response.data])
+        )
+
+      const link =
+        document.createElement("a")
+
+      link.href = url
+
+      link.setAttribute(
+        "download",
+        `session_${selectedSession}.pdf`
       )
 
-      setMessages([])
-
-      alert(
-        "History cleared successfully"
+      document.body.appendChild(
+        link
       )
+
+      link.click()
+
+      link.remove()
 
     } catch (error) {
 
       console.error(error)
 
       alert(
-        "Failed to clear history"
+        "Failed to export PDF"
       )
 
     }
 
   }
+    const clearHistory = async () => {
+
+      try {
+
+        await axios.delete(
+          "http://127.0.0.1:8000/history",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        )
+
+        setMessages([])
+
+        alert(
+          "History cleared successfully"
+        )
+
+      } catch (error) {
+
+        console.error(error)
+
+        alert(
+          "Failed to clear history"
+        )
+
+      }
+
+    }
 
   const handleAnalyze = async () => {
     if (!selectedSession) {
@@ -544,6 +606,17 @@ function Dashboard() {
           }}
         >
           Clear History
+        </button>
+        <button
+          onClick={exportPdf}
+          style={{
+            padding: "10px 15px",
+            marginLeft: "10px",
+            marginBottom: "15px",
+            cursor: "pointer"
+          }}
+        >
+          📄 Export PDF
         </button>
 
         <div
