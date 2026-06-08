@@ -8,6 +8,8 @@ function Dashboard() {
   const [loading, setLoading] = useState(false)
 
   const [sessions, setSessions] = useState([])
+  const [searchTerm,setSearchTerm] = useState("")
+
 
   const [selectedSession,
     setSelectedSession] = useState(null)
@@ -485,8 +487,32 @@ function Dashboard() {
         <h3>
           Conversations
         </h3>
-
-        {sessions.map((session) => (
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) =>
+            setSearchTerm(
+              e.target.value
+            )
+          }
+          style={{
+            width: "100%",
+            padding: "8px",
+            marginBottom: "15px",
+            borderRadius: "6px",
+            border: "1px solid #ddd"
+          }}
+        />
+        {sessions
+          .filter((session) =>
+            session.title
+              .toLowerCase()
+              .includes(
+                searchTerm.toLowerCase()
+              )
+          )
+          .map((session) => ( 
 
           <div
             key={session.id}
