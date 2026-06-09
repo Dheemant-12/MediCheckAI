@@ -606,7 +606,19 @@ function Dashboard() {
         >
           Logout
         </button>
-
+        <button
+          onClick={() =>
+            window.location.href =
+            "/profile"
+          }
+          style={{
+            padding: "10px 15px",
+            marginLeft: "10px",
+            cursor: "pointer"
+          }}
+        >
+          Profile
+        </button>
         <p>
           Describe your symptoms and receive AI-powered guidance.
         </p>
