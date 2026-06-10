@@ -7,7 +7,12 @@ from jose import jwt
 from app.database.dependencies import get_db
 
 from app.models.user_model import User
+from app.models.chat_model import ChatHistory
+from app.models.chat_session_model import ChatSession
 
+from app.security.current_user import (
+    get_current_user
+)
 from app.schemas.symptom_schema import UserSignup
 
 from app.security.auth import (
@@ -95,14 +100,41 @@ def login(
     }
 
 @router.get("/profile")
-def profile(token: str):
-
-    payload = jwt.decode(
-        token,
-        "supersecretkey",
-        algorithms=["HS256"]
+def profile(
+    current_user = Depends(
+        get_current_user
+    ),
+    db: Session = Depends(
+        get_db
     )
+):
+
+    total_sessions = db.query(
+        ChatSession
+    ).filter(
+        ChatSession.user_id ==
+        current_user.id
+    ).count()
+
+    total_messages = db.query(
+        ChatHistory
+    ).filter(
+        ChatHistory.user_id ==
+        current_user.id
+    ).count()
 
     return {
-        "user": payload
+
+        "email":
+        current_user.email,
+
+        "username":
+        current_user.username,
+
+        "total_sessions":
+        total_sessions,
+
+        "total_messages":
+        total_messages
+
     }

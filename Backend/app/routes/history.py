@@ -7,11 +7,11 @@ from reportlab.pdfgen import canvas
 from app.database.connection import SessionLocal
 
 from app.models.chat_model import ChatHistory
+from app.models.chat_session_model import ChatSession
 
 from app.security.current_user import (
     get_current_user
 )
-
 
 router = APIRouter()
 
@@ -126,6 +126,13 @@ def export_session_pdf(
         session_id
     ).all()
 
+    session = db.query(
+        ChatSession
+    ).filter(
+        ChatSession.id ==
+        session_id
+    ).first()
+
     file_name = (
         f"session_{session_id}.pdf"
     )
@@ -136,13 +143,65 @@ def export_session_pdf(
 
     y = 800
 
+    pdf.setFont(
+    "Helvetica-Bold",
+    18
+)
+
+    pdf.drawString(
+            50,
+            y,
+            "MediCheck AI Health Report"
+        )
+
+    y -= 40
+
+    pdf.setFont(
+       "Helvetica",
+        12
+    )
+
     pdf.drawString(
         50,
         y,
-        f"MediCheck AI Report"
+        f"Patient: {current_user.username}"
+    )
+
+    y -= 20
+
+    pdf.drawString(
+        50,
+        y,
+        f"Email: {current_user.email}"
+    )
+
+    y -= 20
+
+    pdf.drawString(
+        50,
+        y,
+        f"Conversation: {session.title}"
     )
 
     y -= 40
+    pdf.setFont(
+    "Helvetica-Bold",
+    14
+)
+
+    pdf.drawString(
+        50,
+        y,
+        "Conversation History"
+    )
+
+    y -= 30
+
+    pdf.setFont(
+        "Helvetica",
+        11
+    )
+
 
     for chat in chats:
 
@@ -157,7 +216,15 @@ def export_session_pdf(
         pdf.drawString(
             50,
             y,
-            f"AI: {chat.ai_response[:100]}"
+            "AI Response:"
+        )
+
+        y -= 20
+
+        pdf.drawString(
+            70,
+            y,
+            chat.ai_response[:150]
         )
 
         y -= 40
@@ -167,6 +234,32 @@ def export_session_pdf(
             pdf.showPage()
 
             y = 800
+
+    y -= 20
+
+    pdf.setFont(
+        "Helvetica-Bold",
+        14
+    )
+
+    pdf.drawString(
+        50,
+        y,
+        "Summary"
+    )
+
+    y -= 25
+
+    pdf.setFont(
+        "Helvetica",
+        11
+    )
+
+    pdf.drawString(
+        50,
+        y,
+        f"Total Messages: {len(chats)}"
+    )
 
     pdf.save()
 
