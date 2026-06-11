@@ -9,6 +9,7 @@ from app.database.dependencies import get_db
 from app.models.user_model import User
 from app.models.chat_model import ChatHistory
 from app.models.chat_session_model import ChatSession
+from sqlalchemy import func
 
 from app.security.current_user import (
     get_current_user
@@ -122,7 +123,58 @@ def profile(
         ChatHistory.user_id ==
         current_user.id
     ).count()
+    average_messages = 0
 
+    if total_sessions > 0:
+
+        average_messages = round(
+            total_messages /
+            total_sessions,
+            2
+        )
+    most_active = db.query(
+
+        ChatHistory.session_id,
+
+        func.count(
+            ChatHistory.id
+        ).label(
+            "message_count"
+        )
+
+    ).filter(
+
+        ChatHistory.user_id ==
+        current_user.id
+
+    ).group_by(
+
+        ChatHistory.session_id
+
+    ).order_by(
+
+        func.count(
+            ChatHistory.id
+        ).desc()
+
+    ).first()     
+    most_active_title =(
+        "No Conversations"
+    )
+    if most_active:
+
+        session = db.query(
+            ChatSession
+        ).filter(
+            ChatSession.id ==
+            most_active.session_id
+        ).first()
+
+        if session:
+
+            most_active_title =(
+                session.title   
+            )
     return {
 
         "email":
@@ -135,6 +187,12 @@ def profile(
         total_sessions,
 
         "total_messages":
-        total_messages
+        total_messages,
+
+        "average_messages":
+        average_messages,
+
+        "most_active":
+        most_active_title
 
     }

@@ -91,6 +91,16 @@ function Profile() {
         {profile.total_messages}
       </h3>
 
+      <h3>
+        Average Messages:
+        {profile.average_messages}
+      </h3>
+
+      <h3>
+        Most Active Chat:
+        {profile.most_active}
+      </h3>
+
     </div>
 
   )
