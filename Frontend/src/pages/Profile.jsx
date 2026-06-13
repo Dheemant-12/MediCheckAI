@@ -55,15 +55,37 @@ function Profile() {
 
   return (
 
-    <div
-      style={{
-        padding: "40px"
-      }}
-    >
-
+  <div
+    style={{
+      padding: "40px",
+      maxWidth: "700px",
+      margin: "0 auto"
+    }}
+  >
+      <button
+        onClick={() =>
+          window.location.href =
+          "/dashboard"
+        }
+        style={{
+          padding: "10px 15px",
+          cursor: "pointer"
+        }}
+      >
+        ← Dashboard
+      </button>
       <h1>
         👤 Profile
       </h1>
+      <div
+        style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "12px",
+          border: "1px solid #ddd",
+          marginTop: "20px"
+        }}
+      ></div>
 
       <h3>
         Username:
@@ -100,8 +122,8 @@ function Profile() {
         Most Active Chat:
         {profile.most_active}
       </h3>
+      </div>
 
-    </div>
 
   )
 

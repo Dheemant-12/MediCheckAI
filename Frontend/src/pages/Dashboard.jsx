@@ -9,6 +9,15 @@ function Dashboard() {
 
   const [sessions, setSessions] = useState([])
   const [searchTerm,setSearchTerm] = useState("")
+  const filteredSessions =
+  sessions.filter(
+    (session) =>
+      session.title
+        .toLowerCase()
+        .includes(
+          searchTerm.toLowerCase()
+        )
+  )
 
 
   const [selectedSession,
@@ -484,9 +493,9 @@ function Dashboard() {
         }}
       >
 
-        <h3>
-          Conversations
-        </h3>
+        <h2>
+          💬 Conversations
+        </h2>
         <input
           type="text"
           placeholder="Search..."
@@ -504,15 +513,15 @@ function Dashboard() {
             border: "1px solid #ddd"
           }}
         />
-        {sessions
-          .filter((session) =>
-            session.title
-              .toLowerCase()
-              .includes(
-                searchTerm.toLowerCase()
-              )
-          )
-          .map((session) => ( 
+        {filteredSessions.length === 0 && (
+
+          <p>
+            No conversations found.
+          </p>
+
+        )}
+
+        {filteredSessions.map((session) => ( 
 
           <div
             key={session.id}
