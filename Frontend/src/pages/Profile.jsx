@@ -7,7 +7,8 @@ function Profile() {
 
   const [profile,
     setProfile] = useState(null)
-
+  const [timeline,
+    setTimeline] = useState([])
   const token =
     localStorage.getItem(
       "token"
@@ -16,6 +17,35 @@ function Profile() {
   useEffect(() => {
 
     loadProfile()
+    const loadTimeline =
+      async () => {
+
+        try {
+
+          const response =
+            await axios.get(
+              "http://127.0.0.1:8000/timeline",
+              {
+                headers: {
+                  Authorization:
+                    `Bearer ${token}`
+                }
+              }
+            )
+
+          setTimeline(
+            response.data
+          )
+
+        } catch (error) {
+
+          console.error(error)
+
+        }
+
+      }
+
+    loadTimeline()
 
   }, [])
 
@@ -122,6 +152,29 @@ function Profile() {
         Most Active Chat:
         {profile.most_active}
       </h3>
+      <hr />
+
+      <h2>
+        Medical Timeline
+      </h2>
+
+      {timeline.map((item) => (
+
+        <div
+          key={item.id}
+          style={{
+            padding: "10px",
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            marginBottom: "10px"
+          }}
+        >
+
+          {item.title}
+
+        </div>
+
+      ))}
       </div>
 
 

@@ -196,3 +196,44 @@ def profile(
         most_active_title
 
     }
+@router.get("/timeline")
+def timeline(
+
+    current_user = Depends(
+        get_current_user
+    ),
+
+    db: Session = Depends(
+        get_db
+    )
+
+):
+
+    sessions = db.query(
+        ChatSession
+    ).filter(
+
+        ChatSession.user_id ==
+        current_user.id
+
+    ).order_by(
+
+        ChatSession.id.desc()
+
+    ).all()
+
+    result = []
+
+    for session in sessions:
+
+        result.append({
+
+            "id":
+            session.id,
+
+            "title":
+            session.title
+
+        })
+
+    return result
