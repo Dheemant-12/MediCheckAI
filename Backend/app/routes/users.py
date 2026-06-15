@@ -10,6 +10,7 @@ from app.models.user_model import User
 from app.models.chat_model import ChatHistory
 from app.models.chat_session_model import ChatSession
 from sqlalchemy import func
+from collections import Counter
 
 from app.security.current_user import (
     get_current_user
@@ -233,6 +234,61 @@ def timeline(
 
             "title":
             session.title
+
+        })
+
+    return result
+@router.get("/symptom-trends")
+def symptom_trends(
+
+    current_user = Depends(
+        get_current_user
+    ),
+
+    db: Session = Depends(
+        get_db
+    )
+
+):
+
+    sessions = db.query(
+        ChatSession
+    ).filter(
+        ChatSession.user_id ==
+        current_user.id
+    ).all()
+
+    words = []
+
+    for session in sessions:
+
+        title_words = (
+            session.title
+            .lower()
+            .split()
+        )
+
+        for word in title_words:
+
+            if len(word) > 2:
+
+                words.append(
+                    word
+                )
+
+    counter = Counter(
+        words
+    )
+
+    result = []
+
+    for word, count in counter.most_common(5):
+
+        result.append({
+
+            "symptom": word,
+
+            "count": count
 
         })
 

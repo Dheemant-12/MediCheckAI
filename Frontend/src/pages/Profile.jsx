@@ -9,6 +9,8 @@ function Profile() {
     setProfile] = useState(null)
   const [timeline,
     setTimeline] = useState([])
+  const [trends,
+    setTrends] = useState([])  
   const token =
     localStorage.getItem(
       "token"
@@ -16,66 +18,100 @@ function Profile() {
 
   useEffect(() => {
 
-    loadProfile()
-    const loadTimeline =
-      async () => {
+  loadProfile()
 
-        try {
+  loadTimeline()
 
-          const response =
-            await axios.get(
-              "http://127.0.0.1:8000/timeline",
-              {
-                headers: {
-                  Authorization:
-                    `Bearer ${token}`
-                }
-              }
-            )
+  loadTrends()
 
-          setTimeline(
-            response.data
-          )
+}, [])
 
-        } catch (error) {
 
-          console.error(error)
+const loadProfile =
+async () => {
 
-        }
+  try {
 
-      }
-
-    loadTimeline()
-
-  }, [])
-
-  const loadProfile =
-  async () => {
-
-    try {
-
-      const response =
-        await axios.get(
-          "http://127.0.0.1:8000/profile",
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`
-            }
+    const response =
+      await axios.get(
+        "http://127.0.0.1:8000/profile",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
           }
-        )
-
-      setProfile(
-        response.data
+        }
       )
 
-    } catch (error) {
+    setProfile(
+      response.data
+    )
 
-      console.error(error)
+  } catch (error) {
 
-    }
+    console.error(error)
 
   }
+
+}
+
+
+const loadTimeline =
+async () => {
+
+  try {
+
+    const response =
+      await axios.get(
+        "http://127.0.0.1:8000/timeline",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
+        }
+      )
+
+    setTimeline(
+      response.data
+    )
+
+  } catch (error) {
+
+    console.error(error)
+
+  }
+
+}
+
+
+const loadTrends =
+async () => {
+
+  try {
+
+    const response =
+      await axios.get(
+        "http://127.0.0.1:8000/symptom-trends",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
+        }
+      )
+
+    setTrends(
+      response.data
+    )
+
+  } catch (error) {
+
+    console.error(error)
+
+  }
+
+}
 
   if (!profile) {
 
@@ -152,6 +188,33 @@ function Profile() {
         Most Active Chat:
         {profile.most_active}
       </h3>
+
+      <hr />
+
+      <h2>
+        Symptom Trends
+      </h2>
+
+      {trends.map((item) => (
+
+        <div
+          key={item.symptom}
+          style={{
+            padding: "10px",
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            marginBottom: "10px"
+          }}
+        >
+
+          {item.symptom}
+          {" : "}
+          {item.count}
+
+        </div>
+
+      ))}
+
       <hr />
 
       <h2>
