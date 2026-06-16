@@ -293,3 +293,82 @@ def symptom_trends(
         })
 
     return result
+@router.get("/health-insights")
+def health_insights(
+
+    current_user = Depends(
+        get_current_user
+    ),
+
+    db: Session = Depends(
+        get_db
+    )
+
+):
+
+    sessions = db.query(
+        ChatSession
+    ).filter(
+        ChatSession.user_id ==
+        current_user.id
+    ).all()
+
+    words = []
+
+    stop_words = [
+
+        "and",
+        "the",
+        "for",
+        "with",
+        "issues",
+        "discussion"
+
+    ]
+
+    for session in sessions:
+
+        title_words = (
+            session.title
+            .lower()
+            .split()
+        )
+
+        for word in title_words:
+
+            if (
+                len(word) > 2
+                and word not in stop_words
+            ):
+
+                words.append(
+                    word
+                )
+
+    counter = Counter(
+        words
+    )
+
+    insights = []
+
+    for word, count in counter.most_common(3):
+
+        if count > 1:
+
+            insights.append(
+                f"{word.title()} appears frequently."
+            )
+
+        else:
+
+            insights.append(
+                f"{word.title()} has appeared in your history."
+            )
+
+    if len(insights) > 0:
+
+        insights.append(
+            "Monitor recurring symptoms carefully."
+        )
+
+    return insights

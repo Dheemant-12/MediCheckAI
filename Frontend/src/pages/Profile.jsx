@@ -11,6 +11,8 @@ function Profile() {
     setTimeline] = useState([])
   const [trends,
     setTrends] = useState([])  
+  const [insights,
+    setInsights] = useState([])
   const token =
     localStorage.getItem(
       "token"
@@ -23,6 +25,8 @@ function Profile() {
   loadTimeline()
 
   loadTrends()
+
+  loadInsights()
 
 }, [])
 
@@ -112,6 +116,33 @@ async () => {
   }
 
 }
+const loadInsights =
+async () => {
+
+  try {
+
+    const response =
+      await axios.get(
+        "http://127.0.0.1:8000/health-insights",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
+        }
+      )
+
+    setInsights(
+      response.data
+    )
+
+  } catch (error) {
+
+    console.error(error)
+
+  }
+
+}
 
   if (!profile) {
 
@@ -190,6 +221,30 @@ async () => {
       </h3>
 
       <hr />
+      <hr />
+
+      <h2>
+        Health Insights
+      </h2>
+
+      {insights.map((item, index) => (
+
+        <div
+          key={index}
+          style={{
+            padding: "10px",
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            marginBottom: "10px",
+            background: "#f8f9fa"
+          }}
+        >
+
+          • {item}
+
+        </div>
+
+      ))}
 
       <h2>
         Symptom Trends
