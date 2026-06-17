@@ -372,3 +372,71 @@ def health_insights(
         )
 
     return insights
+@router.get("/risk-score")
+def risk_score(
+
+    current_user = Depends(
+        get_current_user
+    ),
+
+    db: Session = Depends(
+        get_db
+    )
+
+):
+
+    sessions = db.query(
+        ChatSession
+    ).filter(
+        ChatSession.user_id ==
+        current_user.id
+    ).all()
+
+    score = 0
+
+    high_risk_words = [
+
+        "chest",
+        "pain",
+        "migraine",
+        "fever"
+
+    ]
+
+    for session in sessions:
+
+        title = (
+            session.title
+            .lower()
+        )
+
+        for word in high_risk_words:
+
+            if word in title:
+
+                score += 15
+
+    score = min(
+        score,
+        100
+    )
+
+    if score <= 30:
+
+        level = "Low"
+
+    elif score <= 70:
+
+        level = "Medium"
+
+    else:
+
+        level = "High"
+
+    return {
+
+        "score": score,
+
+        "level": level
+
+    }

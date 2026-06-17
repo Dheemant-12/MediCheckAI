@@ -13,6 +13,8 @@ function Profile() {
     setTrends] = useState([])  
   const [insights,
     setInsights] = useState([])
+  const [riskScore,
+    setRiskScore] = useState(null)
   const token =
     localStorage.getItem(
       "token"
@@ -27,6 +29,8 @@ function Profile() {
   loadTrends()
 
   loadInsights()
+
+  loadRiskScore()
 
 }, [])
 
@@ -143,7 +147,33 @@ async () => {
   }
 
 }
+const loadRiskScore =
+async () => {
 
+  try {
+
+    const response =
+      await axios.get(
+        "http://127.0.0.1:8000/risk-score",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
+        }
+      )
+
+    setRiskScore(
+      response.data
+    )
+
+  } catch (error) {
+
+    console.error(error)
+
+  }
+
+}
   if (!profile) {
 
     return <h2>Loading...</h2>
@@ -222,7 +252,39 @@ async () => {
 
       <hr />
       <hr />
+      <hr />
 
+      <h2>
+        Health Risk Score
+      </h2>
+
+      {riskScore && (
+
+        <div
+          style={{
+            padding: "15px",
+            border: "1px solid #ddd",
+            borderRadius: "10px",
+            marginBottom: "15px"
+          }}
+        >
+
+          <h3>
+            Score:
+            {" "}
+            {riskScore.score}
+            /100
+          </h3>
+
+          <h3>
+            Risk Level:
+            {" "}
+            {riskScore.level}
+          </h3>
+
+        </div>
+
+)}
       <h2>
         Health Insights
       </h2>
