@@ -225,7 +225,55 @@ async () => {
       </h3>
 
       <hr />
+      <hr />
 
+      <h2>
+        Health Dashboard Summary
+      </h2>
+
+      <div
+        style={{
+          border: "1px solid #ddd",
+          borderRadius: "10px",
+          padding: "15px",
+          marginBottom: "20px",
+          background: "#f8f9fa"
+        }}
+      >
+
+        <h3>
+          Total Conversations:
+          {" "}
+          {profile.total_sessions}
+        </h3>
+
+        <h3>
+          Total Messages:
+          {" "}
+          {profile.total_messages}
+        </h3>
+
+        {riskScore && (
+
+          <h3>
+            Health Risk:
+            {" "}
+            {riskScore.level}
+            {" "}
+            (
+            {riskScore.score}
+            /100)
+          </h3>
+
+        )}
+
+        <h3>
+          Most Active Chat:
+          {" "}
+          {profile.most_active}
+        </h3>
+
+      </div>
       <h2>
         Statistics
       </h2>
