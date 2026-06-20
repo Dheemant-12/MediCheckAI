@@ -6,7 +6,7 @@ from app.routes.users import router as users_router
 from app.routes.history import router as history_router
 from app.models.chat_session_model import ChatSession
 from app.routes.sessions import router as sessions_router
-
+from app.routes.rag import router as rag_router
 
 
 from app.database.connection import engine, Base
@@ -38,3 +38,6 @@ app.include_router(symptoms_router)
 app.include_router(users_router)
 app.include_router(history_router)
 app.include_router(sessions_router)
+app.include_router(
+    rag_router
+)
