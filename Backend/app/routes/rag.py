@@ -111,3 +111,58 @@ async def upload_pdf(
     len(chunks)
 
 }
+@router.post("/ask-pdf")
+async def ask_pdf(
+
+    data: dict
+
+):
+
+    question = data.get(
+        "question"
+    )
+
+    if not question:
+
+        return {
+            "answer":
+            "No question provided"
+        }
+
+    if vector_store is None:
+
+        return {
+            "answer":
+            "No PDF uploaded"
+        }
+
+    question_embedding = model.encode(
+        [question]
+    )
+
+    distances, indices = (
+
+        vector_store.search(
+
+            np.array(
+                question_embedding
+            ).astype(
+                "float32"
+            ),
+
+            1
+
+        )
+
+    )
+
+    best_chunk = stored_chunks[
+        indices[0][0]
+    ]
+
+    return {
+
+        "answer":
+        best_chunk
+
+    }
