@@ -5,7 +5,9 @@ from fastapi import File
 from pypdf import PdfReader
 import faiss
 import numpy as np
-
+from openai import OpenAI
+import os
+from dotenv import load_dotenv
 from sentence_transformers import (
     SentenceTransformer
 )
@@ -20,6 +22,14 @@ model = SentenceTransformer(
 vector_store = None
 
 stored_chunks = []
+load_dotenv()
+
+client = OpenAI(
+    base_url="https://integrate.api.nvidia.com/v1",
+    api_key=os.getenv(
+        "NVIDIA_API_KEY"
+    )
+)
 def chunk_text(
 
     text,
@@ -160,9 +170,48 @@ async def ask_pdf(
         indices[0][0]
     ]
 
+    response = client.chat.completions.create(
+
+        model="meta/llama-3.1-70b-instruct",
+
+        messages=[
+
+            {
+                "role": "system",
+                "content":
+                "Answer only from the provided context."
+            },
+
+            {
+                "role": "user",
+                "content":
+                f"""
+    Context:
+
+    {best_chunk}
+
+    Question:
+
+    {question}
+    """
+            }
+
+        ],
+
+        temperature=0.2,
+        max_tokens=300
+
+    )
+
+    answer = (
+        response
+        .choices[0]
+        .message.content
+    )
+
     return {
 
         "answer":
-        best_chunk
+        answer
 
     }
