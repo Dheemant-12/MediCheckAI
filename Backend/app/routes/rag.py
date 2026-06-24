@@ -166,8 +166,12 @@ async def ask_pdf(
 
     )
 
+    chunk_index = int(
+    indices[0][0]
+    )
+
     best_chunk = stored_chunks[
-        indices[0][0]
+        chunk_index
     ]
 
     response = client.chat.completions.create(
@@ -211,7 +215,13 @@ async def ask_pdf(
 
     return {
 
-        "answer":
-        answer
+    "answer":
+    answer,
 
-    }
+    "source_chunk":
+    chunk_index,
+
+    "source_preview":
+    best_chunk[:150]
+
+}
