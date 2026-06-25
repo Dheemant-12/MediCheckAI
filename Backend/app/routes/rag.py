@@ -22,6 +22,7 @@ model = SentenceTransformer(
 vector_store = None
 
 stored_chunks = []
+conversation_memory = []
 load_dotenv()
 
 client = OpenAI(
@@ -139,6 +140,14 @@ async def ask_pdf(
             "No question provided"
         }
 
+    conversation_memory.append({
+
+        "role": "user",
+
+        "content": question
+
+    })
+
     if vector_store is None:
 
         return {
@@ -180,35 +189,45 @@ async def ask_pdf(
         retrieved_chunks
     )
 
+    messages = [
+
+        {
+            "role": "system",
+            "content":
+            "Answer only from the provided context."
+        }
+
+    ]
+
+    messages.extend(
+        conversation_memory[-4:]
+    )
+
+    messages.append({
+
+        "role": "user",
+
+        "content":
+        f"""
+Context:
+
+{context}
+
+Question:
+
+{question}
+"""
+
+    })
+
     response = client.chat.completions.create(
 
         model="meta/llama-3.1-70b-instruct",
 
-        messages=[
-
-            {
-                "role": "system",
-                "content":
-                "Answer only from the provided context."
-            },
-
-            {
-                "role": "user",
-                "content":
-                f"""
-    Context:
-
-    {context}
-
-    Question:
-
-    {question}
-    """
-            }
-
-        ],
+        messages=messages,
 
         temperature=0.2,
+
         max_tokens=300
 
     )
@@ -219,15 +238,23 @@ async def ask_pdf(
         .message.content
     )
 
+    conversation_memory.append({
+
+        "role": "assistant",
+
+        "content": answer
+
+    })
+
     return {
 
-    "answer":
-    answer,
+        "answer":
+        answer,
 
-    "chunks_used":
-    len(retrieved_chunks),
+        "chunks_used":
+        len(retrieved_chunks),
 
-    "source_preview":
-    retrieved_chunks[0][:150]
+        "source_preview":
+        retrieved_chunks[0][:150]
 
-}
+    }
