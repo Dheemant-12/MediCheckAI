@@ -160,19 +160,25 @@ async def ask_pdf(
                 "float32"
             ),
 
-            1
+            3
 
         )
 
     )
 
-    chunk_index = int(
-    indices[0][0]
-    )
+    retrieved_chunks = []
 
-    best_chunk = stored_chunks[
-        chunk_index
-    ]
+    for idx in indices[0]:
+
+        if idx < len(stored_chunks):
+
+            retrieved_chunks.append(
+                stored_chunks[idx]
+            )
+
+    context = "\n\n".join(
+        retrieved_chunks
+    )
 
     response = client.chat.completions.create(
 
@@ -192,7 +198,7 @@ async def ask_pdf(
                 f"""
     Context:
 
-    {best_chunk}
+    {context}
 
     Question:
 
@@ -218,10 +224,10 @@ async def ask_pdf(
     "answer":
     answer,
 
-    "source_chunk":
-    chunk_index,
+    "chunks_used":
+    len(retrieved_chunks),
 
     "source_preview":
-    best_chunk[:150]
+    retrieved_chunks[0][:150]
 
 }
