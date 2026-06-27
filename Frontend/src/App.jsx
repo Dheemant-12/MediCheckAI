@@ -8,7 +8,7 @@ import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import Dashboard from "./pages/Dashboard"
 import Profile from "./pages/Profile"
-
+import RAG from "./pages/RAG"
 function ProtectedRoute({ children }) {
 
   const token =
@@ -46,6 +46,13 @@ function App() {
       <Route
         path="/profile"
         element={<Profile />}
+      />
+      <Route
+
+        path="/rag"
+
+        element={<RAG />}
+
       />
 
     </Routes>
