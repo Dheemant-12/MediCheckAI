@@ -7,6 +7,7 @@ import faiss
 import numpy as np
 from openai import OpenAI
 import os
+import pickle
 from dotenv import load_dotenv
 from sentence_transformers import (
     SentenceTransformer
@@ -22,6 +23,9 @@ model = SentenceTransformer(
 vector_store = None
 
 stored_chunks = []
+INDEX_FILE = "faiss_index.bin"
+
+CHUNKS_FILE = "chunks.pkl"
 conversation_memory = []
 load_dotenv()
 
@@ -31,6 +35,26 @@ client = OpenAI(
         "NVIDIA_API_KEY"
     )
 )
+try:
+
+    vector_store = faiss.read_index(
+        INDEX_FILE
+    )
+
+    with open(
+        CHUNKS_FILE,
+        "rb"
+    ) as file:
+
+        stored_chunks = pickle.load(
+            file
+        )
+
+except:
+
+    vector_store = None
+
+    stored_chunks = []
 def chunk_text(
 
     text,
@@ -107,6 +131,29 @@ async def upload_pdf(
         )
 
     )
+    faiss.write_index(
+
+    vector_store,
+
+    INDEX_FILE
+
+)
+
+    with open(
+
+        CHUNKS_FILE,
+
+        "wb"
+
+    ) as file:
+
+        pickle.dump(
+
+            chunks,
+
+            file
+
+        )
 
     stored_chunks = chunks
 
