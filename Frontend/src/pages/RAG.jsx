@@ -10,7 +10,8 @@ function RAG() {
   const [question, setQuestion] = useState("")
 
   const [answer, setAnswer] = useState("")
-
+  const [sourcePreview, setSourcePreview] = useState("")
+  const [chunksUsed, setChunksUsed] = useState(0)
   const token = localStorage.getItem("token")
 
   const uploadPDF = async () => {
@@ -108,6 +109,13 @@ function RAG() {
       setAnswer(
         response.data.answer
       )
+      setSourcePreview(
+        response.data.source_preview
+      )
+
+      setChunksUsed(
+        response.data.chunks_used
+      )
 
     }
 
@@ -204,6 +212,50 @@ function RAG() {
       >
 
         <strong>
+
+          AI Answer
+
+        </strong>
+
+        <br /><br />
+
+        {answer}
+
+        <hr />
+
+        <strong>
+
+          📄 Source
+
+        </strong>
+
+        <br /><br />
+
+        <b>
+
+          Chunks Used:
+
+        </b>
+
+        {" "}
+
+        {chunksUsed}
+
+        <br /><br />
+
+        <b>
+
+          Preview:
+
+        </b>
+
+        <br />
+
+        {sourcePreview}
+
+      </div>
+
+        <strong>
           AI Answer
         </strong>
 
@@ -213,7 +265,7 @@ function RAG() {
 
       </div>
 
-    </div>
+    
 
   )
 
