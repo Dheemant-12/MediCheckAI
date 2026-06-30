@@ -3,31 +3,30 @@ from fastapi import UploadFile
 from fastapi import File
 
 from pypdf import PdfReader
+
 import faiss
 import numpy as np
-from openai import OpenAI
 import os
 import pickle
+
+from openai import OpenAI
 from dotenv import load_dotenv
-from sentence_transformers import (
-    SentenceTransformer
-)
+from sentence_transformers import SentenceTransformer
 
 router = APIRouter()
 
-knowledge_base = []
+load_dotenv()
+
 model = SentenceTransformer(
     "all-MiniLM-L6-v2"
 )
 
-vector_store = None
-
-stored_chunks = []
 INDEX_FILE = "faiss_index.bin"
-
 CHUNKS_FILE = "chunks.pkl"
+
+vector_store = None
+stored_chunks = []
 conversation_memory = []
-load_dotenv()
 
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
@@ -35,6 +34,7 @@ client = OpenAI(
         "NVIDIA_API_KEY"
     )
 )
+
 try:
 
     vector_store = faiss.read_index(
@@ -50,11 +50,12 @@ try:
             file
         )
 
-except:
+except Exception:
 
     vector_store = None
-
     stored_chunks = []
+
+
 def chunk_text(
 
     text,
@@ -65,29 +66,27 @@ def chunk_text(
     chunks = []
 
     for i in range(
-
         0,
         len(text),
         chunk_size
-
     ):
 
         chunks.append(
-
             text[
-                i:i+chunk_size
+                i:i + chunk_size
             ]
-
         )
 
     return chunks
-
 @router.post("/upload-pdf")
 async def upload_pdf(
 
     file: UploadFile = File(...)
 
 ):
+
+    global vector_store
+    global stored_chunks
 
     reader = PdfReader(
         file.file
@@ -104,41 +103,53 @@ async def upload_pdf(
             text += extracted
 
     chunks = chunk_text(
-    text
+        text
     )
+
+    if len(chunks) == 0:
+
+        return {
+
+            "message":
+            "No text found in PDF"
+
+        }
 
     embeddings = model.encode(
         chunks
     )
 
-    global vector_store
-    global stored_chunks
-
-    dimension = len(
-        embeddings[0]
+    new_vectors = np.array(
+        embeddings
+    ).astype(
+        "float32"
     )
 
-    vector_store = faiss.IndexFlatL2(
-        dimension
-    )
+    if vector_store is None:
 
-    vector_store.add(
-
-        np.array(
-            embeddings
-        ).astype(
-            "float32"
+        vector_store = faiss.IndexFlatL2(
+            new_vectors.shape[1]
         )
 
+    vector_store.add(
+        new_vectors
     )
+
+    # Add new chunks without removing old ones
+    stored_chunks.extend(
+        chunks
+    )
+
+    # Save FAISS index
     faiss.write_index(
 
-    vector_store,
+        vector_store,
 
-    INDEX_FILE
+        INDEX_FILE
 
-)
+    )
 
+    # Save all chunks
     with open(
 
         CHUNKS_FILE,
@@ -149,32 +160,39 @@ async def upload_pdf(
 
         pickle.dump(
 
-            chunks,
+            stored_chunks,
 
             file
 
         )
 
-    stored_chunks = chunks
-
     return {
 
-    "message":
-    "PDF processed",
+        "message":
+        "PDF added successfully",
 
-    "characters":
-    len(text),
+        "characters":
+        len(text),
 
-    "chunks":
-    len(chunks)
+        "new_chunks":
+        len(chunks),
 
-}
+        "total_chunks":
+        len(stored_chunks)
+
+    }
+
+
 @router.post("/ask-pdf")
 async def ask_pdf(
 
     data: dict
 
 ):
+
+    global conversation_memory
+    global vector_store
+    global stored_chunks
 
     question = data.get(
         "question"
@@ -183,8 +201,19 @@ async def ask_pdf(
     if not question:
 
         return {
+
             "answer":
             "No question provided"
+
+        }
+
+    if vector_store is None:
+
+        return {
+
+            "answer":
+            "No PDF uploaded"
+
         }
 
     conversation_memory.append({
@@ -195,29 +224,23 @@ async def ask_pdf(
 
     })
 
-    if vector_store is None:
-
-        return {
-            "answer":
-            "No PDF uploaded"
-        }
-
     question_embedding = model.encode(
+
         [question]
+
     )
 
-    distances, indices = (
+    distances, indices = vector_store.search(
 
-        vector_store.search(
+        np.array(
+            question_embedding
+        ).astype(
+            "float32"
+        ),
 
-            np.array(
-                question_embedding
-            ).astype(
-                "float32"
-            ),
-
-            3
-
+        min(
+            3,
+            len(stored_chunks)
         )
 
     )
@@ -226,28 +249,40 @@ async def ask_pdf(
 
     for idx in indices[0]:
 
-        if idx < len(stored_chunks):
+        if (
+            idx >= 0 and
+            idx < len(stored_chunks)
+        ):
 
             retrieved_chunks.append(
+
                 stored_chunks[idx]
+
             )
 
     context = "\n\n".join(
+
         retrieved_chunks
+
     )
 
     messages = [
 
         {
+
             "role": "system",
+
             "content":
-            "Answer only from the provided context."
+            "Answer only using the provided context. If the answer is not available, clearly say so."
+
         }
 
     ]
 
     messages.extend(
+
         conversation_memory[-4:]
+
     )
 
     messages.append({
@@ -280,9 +315,11 @@ Question:
     )
 
     answer = (
+
         response
         .choices[0]
         .message.content
+
     )
 
     conversation_memory.append({
@@ -302,6 +339,6 @@ Question:
         len(retrieved_chunks),
 
         "source_preview":
-        retrieved_chunks[0][:150]
+        retrieved_chunks[0][:150] if retrieved_chunks else ""
 
     }
